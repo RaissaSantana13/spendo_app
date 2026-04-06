@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spendo_app/expenses.dart';
+import 'package:spendo_app/models/widgets/expenses.dart';
 
 //import 'package:spendo_app/main.dart';
 
