@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spendo_app/models/widgets/expenses_list/expenses_list.dart';
 import 'package:spendo_app/models/expense.dart';
+import 'package:spendo_app/models/widgets/new_expense.dart';
 
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
@@ -27,6 +28,10 @@ class _ExpensesState extends State<Expenses> {
     ),
   ];
 
+  void _openAddExpenseOverlay(){
+    showModalBottomSheet(context: context, builder: (ctx) => NewExpense());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +52,7 @@ class _ExpensesState extends State<Expenses> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed:_openAddExpenseOverlay,
             icon: const Icon(Icons.add, color: Colors.white),
           ),
         ],
