@@ -28,8 +28,15 @@ class _ExpensesState extends State<Expenses> {
     ),
   ];
 
-  void _openAddExpenseOverlay(){
-    showModalBottomSheet(context: context, builder: (ctx) => NewExpense());
+  void _openAddExpenseOverlay() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      clipBehavior: Clip.hardEdge,
+      builder: (ctx) => const NewExpense(),
+    );
   }
 
   @override
@@ -52,7 +59,7 @@ class _ExpensesState extends State<Expenses> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed:_openAddExpenseOverlay,
+            onPressed: _openAddExpenseOverlay,
             icon: const Icon(Icons.add, color: Colors.white),
           ),
         ],
