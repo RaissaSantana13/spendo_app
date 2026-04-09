@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:spendo_app/models/expense.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key});
+  const NewExpense({super.key, required this.onAddExpense});
+
+  final void Function(Expense expense) onAddExpense;
 
   @override
   State<StatefulWidget> createState() {
@@ -12,16 +15,95 @@ class NewExpense extends StatefulWidget {
 class _NewExpenseState extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
+  DateTime? _selectedDate;
+  Category _selectedCategory = Category.leisure;
 
-  void _presentDatePicker() {
+  void _presentDatePicker() async {
     final now = DateTime.now();
     final firstDate = DateTime(now.year - 1, now.month, now.day);
-    showDatePicker(
+    final picketDate = await showDatePicker(
       context: context,
       initialDate: now,
       firstDate: firstDate,
       lastDate: now,
     );
+
+    setState(() {
+      _selectedDate = picketDate;
+    });
+  }
+
+  void _submitExpenseData() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
+    if (_titleController.text.trim().isEmpty ||
+        amountIsInvalid ||
+        _selectedDate == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Invalid input',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1C1C1E),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Please make sure a valid title, amount, date and category was entered.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF5C6BC0),
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Okay'),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    widget.onAddExpense(
+      Expense(
+        title: _titleController.text,
+        amount: enteredAmount,
+        date: _selectedDate!,
+        category: _selectedCategory,
+      ),
+    );
+    Navigator.pop(context);
   }
 
   @override
@@ -34,21 +116,32 @@ class _NewExpenseState extends State<NewExpense> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+      labelStyle: const TextStyle(
+        color: Color(0xFF6B7280),
+        fontSize: 13,
+      ),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 16,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: const BorderSide(
+          color: Color(0xFFE5E7EB),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFF5C6BC0), width: 1.6),
+        borderSide: const BorderSide(
+          color: Color(0xFF5C6BC0),
+          width: 1.6,
+        ),
       ),
     );
   }
@@ -57,10 +150,13 @@ class _NewExpenseState extends State<NewExpense> {
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xFFEFF4FF),
-
       child: Padding(
-        padding: const EdgeInsets.all(16),
-
+        padding: EdgeInsets.only(
+          top: 16,
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Column(
           children: [
             TextField(
@@ -73,9 +169,7 @@ class _NewExpenseState extends State<NewExpense> {
               ),
               decoration: _inputDecoration('Title'),
             ),
-
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Expanded(
@@ -96,40 +190,81 @@ class _NewExpenseState extends State<NewExpense> {
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Selected Date',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF6B7280),
-                        ),
+                  child: GestureDetector(
+                    onTap: _presentDatePicker,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      IconButton(
-                        onPressed: _presentDatePicker,
-                        icon: const Icon(
-                          Icons.calendar_month,
-                          color: Color(0xFF5C6BC0),
-                        ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _selectedDate == null
+                                  ? 'Select date'
+                                  : formatter.format(_selectedDate!),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _selectedDate == null
+                                    ? const Color(0xFF6B7280)
+                                    : const Color(0xFF1C1C1E),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.calendar_month,
+                            color: Color(0xFF5C6BC0),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // BUTTONS
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Category>(
+                      value: _selectedCategory,
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      style: const TextStyle(
+                        color: Color(0xFF1C1C1E),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      items: Category.values.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(category.name.toUpperCase()),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const Spacer(),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -139,9 +274,7 @@ class _NewExpenseState extends State<NewExpense> {
                     style: TextStyle(color: Color(0xFF6B7280)),
                   ),
                 ),
-
                 const SizedBox(width: 8),
-
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5C6BC0),
@@ -153,10 +286,7 @@ class _NewExpenseState extends State<NewExpense> {
                     shape: const StadiumBorder(),
                     elevation: 2,
                   ),
-                  onPressed: () {
-                    print(_titleController.text);
-                    print(_amountController.text);
-                  },
+                  onPressed: _submitExpenseData,
                   child: const Text(
                     'Save Expense',
                     style: TextStyle(fontWeight: FontWeight.w600),

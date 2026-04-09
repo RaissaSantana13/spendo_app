@@ -29,14 +29,24 @@ class _ExpensesState extends State<Expenses> {
   ];
 
   void _openAddExpenseOverlay() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      clipBehavior: Clip.hardEdge,
-      builder: (ctx) => const NewExpense(),
-    );
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, 
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    clipBehavior: Clip.hardEdge,
+    builder: (ctx) => SizedBox(
+      height: MediaQuery.of(context).size.height * 0.87, 
+      child: NewExpense(onAddExpense: _addExpense),
+    ),
+  );
+}
+
+  void _addExpense(Expense expense){
+    setState(() {
+      _registeredExpenses.add(expense);
+    });
   }
 
   @override
