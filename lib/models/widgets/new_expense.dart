@@ -15,34 +15,32 @@ class _NewExpenseState extends State<NewExpense> {
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
 
-  void _presentDatePicker() async {
-    final now = DateTime.now();
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(now.year - 1, now.month, now.day),
-      lastDate: now,
-    );
-    setState(() => _selectedDate = pickedDate);
-  }
-
   void _submitExpenseData() {
     final enteredAmount = double.tryParse(_amountController.text);
-    final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
-    if (_titleController.text.trim().isEmpty || amountIsInvalid || _selectedDate == null) {
+    if (_titleController.text.trim().isEmpty || enteredAmount == null || _selectedDate == null) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Invalid input'),
           content: const Text('Please make sure a valid title, amount, date and category was entered.'),
           actions: [
-            ElevatedButton(onPressed: () => Navigator.pop(ctx), child: const Text('Okay')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Okay'),
+            )
           ],
         ),
       );
       return;
     }
-    widget.onAddExpense(Expense(title: _titleController.text, amount: enteredAmount, date: _selectedDate!, category: _selectedCategory));
+    widget.onAddExpense(
+      Expense(
+        title: _titleController.text,
+        amount: enteredAmount,
+        date: _selectedDate!,
+        category: _selectedCategory,
+      ),
+    );
     Navigator.pop(context);
   }
 
@@ -56,30 +54,49 @@ class _NewExpenseState extends State<NewExpense> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(controller: _titleController, maxLength: 50, decoration: const InputDecoration(labelText: 'Title')),
-          const SizedBox(height: 12),
+          TextField(
+            controller: _titleController,
+            maxLength: 50,
+            decoration: const InputDecoration(labelText: 'Title'),
+          ),
           Row(
             children: [
-              Expanded(child: TextField(controller: _amountController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Amount', prefixText: '\$ '))),
+              Expanded(
+                child: TextField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    prefixText: '\$ ',
+                    labelText: 'Amount',
+                  ),
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                child: GestureDetector(
-                  onTap: _presentDatePicker,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 56,
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFFE5E7EB))),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text(_selectedDate == null ? 'Select date' : formatter.format(_selectedDate!), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
-                        Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.primary),
-                      ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      _selectedDate == null ? 'No date' : formatter.format(_selectedDate!),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     ),
-                  ),
+                    IconButton(
+                      onPressed: () async {
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(DateTime.now().year - 1),
+                          lastDate: DateTime.now(),
+                        );
+                        setState(() => _selectedDate = pickedDate);
+                      },
+                      icon: const Icon(Icons.calendar_month),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -89,13 +106,27 @@ class _NewExpenseState extends State<NewExpense> {
             children: [
               DropdownButton<Category>(
                 value: _selectedCategory,
-                items: Category.values.map((cat) => DropdownMenuItem(value: cat, child: Text(cat.name.toUpperCase()))).toList(),
+                items: Category.values
+                    .map((cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat.name.toUpperCase()),
+                        ))
+                    .toList(),
                 onChanged: (value) => setState(() => _selectedCategory = value!),
               ),
               const Spacer(),
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-              const SizedBox(width: 8),
-              ElevatedButton(onPressed: _submitExpenseData, child: const Text('Save Expense')),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ),
+                onPressed: _submitExpenseData,
+                child: const Text('Save Expense'),
+              ),
             ],
           ),
         ],

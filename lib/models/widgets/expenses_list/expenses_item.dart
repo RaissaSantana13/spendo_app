@@ -15,28 +15,28 @@ class ExepenseItem extends StatelessWidget {
           children: [
             Text(
               expense.title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             Row(
               children: [
                 Text(
                   '\$${expense.amount.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const Spacer(),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(categoryIcons[expense.category], size: 20, color: Theme.of(context).colorScheme.primary),
+                    Icon(categoryIcons[expense.category], 
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      expense.formattedDate,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(width: 10),
-                    Text(expense.formattedDate, style: const TextStyle(fontSize: 12, color: Color(0xFF666666))),
                   ],
                 ),
               ],
