@@ -7,34 +7,20 @@ class Expenses extends StatefulWidget {
   const Expenses({super.key});
 
   @override
-  State<Expenses> createState() {
-    return _ExpensesState();
-  }
+  State<Expenses> createState() => _ExpensesState();
 }
 
 class _ExpensesState extends State<Expenses> {
   final List<Expense> _registeredExpenses = [
-    Expense(
-      title: 'Flutter course',
-      amount: 19.99,
-      date: DateTime.now(),
-      category: Category.work,
-    ),
-    Expense(
-      title: 'Cinema',
-      amount: 35.99,
-      date: DateTime.now(),
-      category: Category.leisure,
-    ),
+    Expense(title: 'Flutter course', amount: 19.99, date: DateTime.now(), category: Category.work),
+    Expense(title: 'Cinema', amount: 35.99, date: DateTime.now(), category: Category.leisure),
   ];
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       clipBehavior: Clip.hardEdge,
       builder: (ctx) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.87,
@@ -44,69 +30,38 @@ class _ExpensesState extends State<Expenses> {
   }
 
   void _addExpense(Expense expense) {
-    setState(() {
-      _registeredExpenses.add(expense);
-    });
+    setState(() => _registeredExpenses.add(expense));
   }
 
   void _removeExpense(Expense expense) {
     final expenseIndex = _registeredExpenses.indexOf(expense);
-
-
-    setState(() {
-      _registeredExpenses.remove(expense);
-    });
+    setState(() => _registeredExpenses.remove(expense));
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: Duration(seconds: 3),
-        content: Text('Expense deleted.'),
-        action: SnackBarAction(label: 'Undo', onPressed: () {
-          setState(() {
-            _registeredExpenses.insert(expenseIndex, expense);
-          });
-        }),
+        duration: const Duration(seconds: 3),
+        content: const Text('Expense deleted.'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => setState(() => _registeredExpenses.insert(expenseIndex, expense)),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget mainContent = Center(
-      child: Text('No expenses found. Start assing some!'),
-    );
+    Widget mainContent = const Center(child: Text('No expenses found. Start adding some!'));
 
     if (_registeredExpenses.isNotEmpty) {
-      mainContent = ExpenseList(
-        expenses: _registeredExpenses,
-        onRemoveExpense: _removeExpense,
-      );
+      mainContent = ExpenseList(expenses: _registeredExpenses, onRemoveExpense: _removeExpense);
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), // fundo claro bonito
-
       appBar: AppBar(
-        backgroundColor: const Color(0xFF5C6BC0), // roxo/indigo moderno
-        title: const Text(
-          'Spendo',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: _openAddExpenseOverlay,
-            icon: const Icon(Icons.add, color: Colors.white),
-          ),
-        ],
+        title: const Text('Spendo'),
+        actions: [IconButton(onPressed: _openAddExpenseOverlay, icon: const Icon(Icons.add))],
       ),
-
       body: Column(
         children: [
           Container(
@@ -115,19 +70,14 @@ class _ExpensesState extends State<Expenses> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: const Color(0xFF5C6BC0).withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
             ),
-            child: const Text(
+            child: Text(
               'The chart',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF5C6BC0),
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
             ),
           ),
-
           Expanded(child: mainContent),
         ],
       ),
