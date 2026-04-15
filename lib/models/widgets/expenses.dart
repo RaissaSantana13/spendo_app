@@ -13,15 +13,27 @@ class Expenses extends StatefulWidget {
 
 class _ExpensesState extends State<Expenses> {
   final List<Expense> _registeredExpenses = [
-    Expense(title: 'Flutter course', amount: 19.99, date: DateTime.now(), category: Category.work),
-    Expense(title: 'Cinema', amount: 35.99, date: DateTime.now(), category: Category.leisure),
+    Expense(
+      title: 'Flutter course',
+      amount: 19.99,
+      date: DateTime.now(),
+      category: Category.work,
+    ),
+    Expense(
+      title: 'Cinema',
+      amount: 35.99,
+      date: DateTime.now(),
+      category: Category.leisure,
+    ),
   ];
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       clipBehavior: Clip.hardEdge,
       builder: (ctx) => SizedBox(
         height: MediaQuery.of(context).size.height * 0.87,
@@ -44,7 +56,8 @@ class _ExpensesState extends State<Expenses> {
         content: const Text('Expense deleted.'),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () => setState(() => _registeredExpenses.insert(expenseIndex, expense)),
+          onPressed: () =>
+              setState(() => _registeredExpenses.insert(expenseIndex, expense)),
         ),
       ),
     );
@@ -52,23 +65,42 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(BuildContext context) {
-    Widget mainContent = const Center(child: Text('No expenses found. Start adding some!'));
+    final width = MediaQuery.of(context).size.width;
+
+    Widget mainContent = const Center(
+      child: Text('No expenses found. Start adding some!'),
+    );
 
     if (_registeredExpenses.isNotEmpty) {
-      mainContent = ExpenseList(expenses: _registeredExpenses, onRemoveExpense: _removeExpense);
+      mainContent = ExpenseList(
+        expenses: _registeredExpenses,
+        onRemoveExpense: _removeExpense,
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Spendo'),
-        actions: [IconButton(onPressed: _openAddExpenseOverlay, icon: const Icon(Icons.add))],
-      ),
-      body: Column(
-        children: [
-          Chart(expenses: _registeredExpenses),
-          Expanded(child: mainContent),
+        actions: [
+          IconButton(
+            onPressed: _openAddExpenseOverlay,
+            icon: const Icon(Icons.add),
+          ),
         ],
       ),
+      body: width < 600
+          ? Column(
+              children: [
+                Chart(expenses: _registeredExpenses),
+                Expanded(child: mainContent),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: Chart(expenses: _registeredExpenses)),
+                Expanded(child: mainContent),
+              ],
+            ),
     );
   }
 }
