@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spendo_app/models/widgets/expenses.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 var kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color(0xFF5C6BC0),
@@ -12,7 +14,13 @@ var kDarkColorScheme = ColorScheme.fromSeed(
 );
 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
   runApp(const SpendoApp());
 }
 

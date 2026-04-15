@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spendo_app/services/expense_service.dart';
 import 'package:spendo_app/models/widgets/chart/chart.dart';
 import 'package:spendo_app/models/widgets/expenses_list/expenses_list.dart';
 import 'package:spendo_app/models/expense.dart';
@@ -19,20 +20,27 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  final List<Expense> _registeredExpenses = [
-    Expense(
-      title: 'Flutter course',
-      amount: 19.99,
-      date: DateTime.now(),
-      category: Category.work,
-    ),
-    Expense(
-      title: 'Cinema',
-      amount: 35.99,
-      date: DateTime.now(),
-      category: Category.leisure,
-    ),
-  ];
+  final _expenseService = ExpenseService();
+  List<Expense> _registeredExpenses = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExpenses();
+  }
+
+  Future<void> _loadExpenses() async {
+    try {
+      final expenses = await _expenseService.fetchExpenses();
+      setState(() {
+        _registeredExpenses = expenses;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
@@ -49,13 +57,29 @@ class _ExpensesState extends State<Expenses> {
     );
   }
 
-  void _addExpense(Expense expense) {
+  void _addExpense(Expense expense) async {
     setState(() => _registeredExpenses.add(expense));
+    
+    try {
+      await _expenseService.insertExpense(expense);
+      print("DESPESA GUARDADA COM SUCESSO!"); 
+    } catch (error) {
+      print("ERRO AO GUARDAR NO SUPABASE: $error"); 
+      setState(() => _registeredExpenses.remove(expense));
+    }
   }
 
-  void _removeExpense(Expense expense) {
+  void _removeExpense(Expense expense) async {
     final expenseIndex = _registeredExpenses.indexOf(expense);
     setState(() => _registeredExpenses.remove(expense));
+    
+    try {
+      await _expenseService.deleteExpense(expense.id);
+    } catch (error) {
+      setState(() => _registeredExpenses.insert(expenseIndex, expense));
+    }
+    
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -63,8 +87,10 @@ class _ExpensesState extends State<Expenses> {
         content: const Text('Expense deleted.'),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () =>
-              setState(() => _registeredExpenses.insert(expenseIndex, expense)),
+          onPressed: () {
+            setState(() => _registeredExpenses.insert(expenseIndex, expense));
+            _expenseService.insertExpense(expense);
+          },
         ),
       ),
     );
@@ -78,7 +104,9 @@ class _ExpensesState extends State<Expenses> {
       child: Text('No expenses found. Start adding some!'),
     );
 
-    if (_registeredExpenses.isNotEmpty) {
+    if (_isLoading) {
+      mainContent = const Center(child: CircularProgressIndicator());
+    } else if (_registeredExpenses.isNotEmpty) {
       mainContent = ExpenseList(
         expenses: _registeredExpenses,
         onRemoveExpense: _removeExpense,
