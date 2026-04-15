@@ -5,7 +5,14 @@ import 'package:spendo_app/models/expense.dart';
 import 'package:spendo_app/models/widgets/new_expense.dart';
 
 class Expenses extends StatefulWidget {
-  const Expenses({super.key});
+  const Expenses({
+    super.key,
+    required this.currentThemeMode,
+    required this.onToggleTheme,
+  });
+
+  final ThemeMode currentThemeMode;
+  final void Function(bool isCurrentlyDark) onToggleTheme;
 
   @override
   State<Expenses> createState() => _ExpensesState();
@@ -78,8 +85,18 @@ class _ExpensesState extends State<Expenses> {
       );
     }
 
+    final isDarkMode = widget.currentThemeMode == ThemeMode.dark ||
+        (widget.currentThemeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    final themeIcon = isDarkMode ? Icons.light_mode : Icons.dark_mode;
+
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => widget.onToggleTheme(isDarkMode),
+          icon: Icon(themeIcon),
+        ),
         title: const Text('Spendo'),
         actions: [
           IconButton(
@@ -88,19 +105,28 @@ class _ExpensesState extends State<Expenses> {
           ),
         ],
       ),
-      body: width < 600
-          ? Column(
-              children: [
-                Chart(expenses: _registeredExpenses),
-                Expanded(child: mainContent),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: Chart(expenses: _registeredExpenses)),
-                Expanded(child: mainContent),
-              ],
-            ),
+      body: SafeArea(
+        child: width < 600
+            ? Column(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    fit: FlexFit.loose,
+                    child: Chart(expenses: _registeredExpenses),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: mainContent,
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: Chart(expenses: _registeredExpenses)),
+                  Expanded(child: mainContent),
+                ],
+              ),
+      ),
     );
   }
 }

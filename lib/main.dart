@@ -11,10 +11,30 @@ var kDarkColorScheme = ColorScheme.fromSeed(
   surface: const Color(0xFF1E1E1E),
 );
 
-void main() {
 
-  runApp(
-    MaterialApp(
+void main() {
+  runApp(const SpendoApp());
+}
+
+class SpendoApp extends StatefulWidget {
+  const SpendoApp({super.key});
+
+  @override
+  State<SpendoApp> createState() => _SpendoAppState();
+}
+
+class _SpendoAppState extends State<SpendoApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void _toggleTheme(bool isCurrentlyDark) {
+    setState(() {
+      _themeMode = isCurrentlyDark ? ThemeMode.light : ThemeMode.dark;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       darkTheme: ThemeData.dark().copyWith(
         useMaterial3: true,
         colorScheme: kDarkColorScheme,
@@ -25,7 +45,7 @@ void main() {
           centerTitle: true,
           elevation: 0,
           titleTextStyle: const TextStyle(
-            fontSize: 28, // Título maior
+            fontSize: 28,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
             color: Colors.white,
@@ -90,7 +110,7 @@ void main() {
           centerTitle: true,
           elevation: 0,
           titleTextStyle: const TextStyle(
-            fontSize: 28, // Título maior
+            fontSize: 28,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
             color: Colors.white,
@@ -145,8 +165,11 @@ void main() {
           ),
         ),
       ),
-      themeMode: ThemeMode.system,
-      home: const Expenses(),
-    ),
-  );
+      themeMode: _themeMode,
+      home: Expenses(
+        currentThemeMode: _themeMode,
+        onToggleTheme: _toggleTheme,
+      ),
+    );
+  }
 }
