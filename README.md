@@ -9,7 +9,13 @@
 ---
 <div align="center">
   <img src="https://github.com/user-attachments/assets/9010356d-eae6-48e6-bcab-23353eb32101" alt="Spendo App Interface" width="80%">
+  <br><br>
+
+  <a href="https://player.cloudinary.com/embed/?cloud_name=dzkjdll3l&public_id=Spendo_App" target="_blank">
+    <img src="https://img.shields.io/badge/ASSISTIR-DEMO%20VÍDEO-red?style=for-the-badge&logo=youtube" alt="Assistir Demonstração do Spendo App">
+  </a>
 </div>
+
 
 ## 🚀 Funcionalidades Principais
 
